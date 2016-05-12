@@ -117,7 +117,7 @@ EOF;
 
         $result = array(
             'url' => $atts['url'],
-            'pic' => $atts['pic']
+            'pic' => $atts['pic']?$atts['pic']:''
         );
         if (empty($result)) return '';
         $theme = '#FADFA3';

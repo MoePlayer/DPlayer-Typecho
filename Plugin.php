@@ -116,7 +116,7 @@ EOF;
         $atts = self::shortcode_parse_atts($attr);
 
         $result = array(
-            'url' => $atts['url'],
+            'url' => $atts['url']?$atts['url']:'',
             'pic' => $atts['pic']?$atts['pic']:''
         );
         if (empty($result)) return '';
@@ -127,12 +127,6 @@ EOF;
             'autoplay' => false,
             'theme' => $theme
         );
-        //设置播放器属性
-        if(!empty($atts)){
-            foreach ($atts as $k => $att) {
-                $data[$k] = $atts[$k];
-            }
-        }
         //自动播放
         $data['autoplay'] = (bool)$data['autoplay'] && $data['autoplay'] !== 'false';
         //输出代码

@@ -33,6 +33,22 @@ $ npm install
 $ npm run build
 ```
 
+## Related Projects
+
+- [DPlayer-for-typecho](https://github.com/volio/DPlayer-for-typecho)
+
+## Todo
+
+- [ ] 缓冲提示
+
+- [ ] 快捷键: 空格暂停，双击全屏, 方向键控制进度
+
+- [ ] 弹幕相关
+
+- [ ] icon 动画
+
+- [ ] 右键
+
 
 ## LICENSE
 

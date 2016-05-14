@@ -57,7 +57,6 @@ var len = dPlayerOptions.length;
 for(var i=0;i<len;i++){
 	dPlayers[i] = new DPlayer({
 		element: document.getElementById('player' + dPlayerOptions[i]['id']),
-            narrow: false,
             autoplay: dPlayerOptions[i]['autoplay'],
             video: dPlayerOptions[i]['video'],
             theme: dPlayerOptions[i]['theme']
@@ -147,8 +146,7 @@ EOF;
      */
     public static function getUniqueId()
     {
-        self::$playerID++;
-        return self::$playerID;
+        return self::$playerID++;
     }
 
     public static function config(Typecho_Widget_Helper_Form $form){}

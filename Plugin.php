@@ -135,8 +135,8 @@ EOF;
         $data['video'] = $result;
         //弹幕部分配置文件
         $danmaku = array(
-            'get'=>'//api.niconico.in/v1/dplayer/danmaku?m_id='.md5(self::getUrl()).'&token='.md5(md5(self::getUrl())+date('Ymd',time())),
-            'add'=>'//api.niconico.in/v1/dplayer/danmaku?m_id='.md5(self::getUrl()).'&token='.md5(md5(self::getUrl())+date('Ymd',time())),
+            'get'=>'//api.niconico.in/v1/dplayer/danmaku?m_id='.md5(self::getUrl().$id).'&token='.md5(md5(self::getUrl().$id)+date('Ymd',time())),
+            'add'=>'//api.niconico.in/v1/dplayer/danmaku?m_id='.md5(self::getUrl().$id).'&token='.md5(md5(self::getUrl().$id)+date('Ymd',time())),
         );
         $data['danmaku'] = ($atts['danmu']!='false') ? $danmaku : null;
         //加入头部数组

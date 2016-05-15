@@ -59,7 +59,8 @@ for(var i=0;i<len;i++){
 		element: document.getElementById('player' + dPlayerOptions[i]['id']),
             autoplay: dPlayerOptions[i]['autoplay'],
             video: dPlayerOptions[i]['video'],
-            theme: dPlayerOptions[i]['theme']
+            theme: dPlayerOptions[i]['theme'],
+            danmaku: dPlayerOptions[i]['danmaku'],
 	        });
 	dPlayers[i].init();
 }
@@ -132,6 +133,12 @@ EOF;
         $playerCode =  '<div id="player'.$id.'" class="dplayer">';
         $playerCode .= "</div>\n";
         $data['video'] = $result;
+        //弹幕部分配置文件
+        $danmaku = array(
+            'get'=>'//api.niconico.in/v1/dplayer/danmaku?m_id='.md5(self::getUrl()).'&token='.md5(md5(self::getUrl())+date('Ymd',time())),
+            'add'=>'//api.niconico.in/v1/dplayer/danmaku?m_id='.md5(self::getUrl()).'&token='.md5(md5(self::getUrl())+date('Ymd',time())),
+        );
+        $data['danmaku'] = ($atts['danmu']!='false') ? $danmaku : null;
         //加入头部数组
         $js = json_encode($data);
         $playerCode .= <<<EOF
@@ -147,6 +154,11 @@ EOF;
     public static function getUniqueId()
     {
         return self::$playerID++;
+    }
+
+    public function getUrl(){
+        $url = $_SERVER['HTTP_HOST'].$_SERVER['PHP_SELF'];
+        return $url;
     }
 
     public static function config(Typecho_Widget_Helper_Form $form){}

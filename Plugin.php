@@ -11,7 +11,6 @@ if (!defined('__TYPECHO_ROOT_DIR__')) exit;
 
 class DPlayer_Plugin implements Typecho_Plugin_Interface{
 
-    protected static $playerID = 0;
     /**
      * 激活插件方法,如果激活失败,直接抛出异常
      *
@@ -107,13 +106,13 @@ EOF;
         if ( $matches[1] == '[' && $matches[6] == ']' ) {
             return substr($matches[0], 1, -1);
         }
-        //播放器id
-        $id = self::getUniqueId();
         //还原转义后的html
         //[dplayer title=&quot;Test Abc&quot; artist=&quot;haha&quot; id=&quot;1234543&quot;/]
         $attr = htmlspecialchars_decode($matches[3]);
         //[dplayer]标签的属性，类型为array
         $atts = self::shortcode_parse_atts($attr);
+        //播放器id
+        $id = md5($_SERVER['HTTP_HOST'].$atts['url']);
 
         $result = array(
             'url' => $atts['url']?$atts['url']:'',
@@ -135,8 +134,8 @@ EOF;
         $data['video'] = $result;
         //弹幕部分配置文件
         $danmaku = array(
-            'get'=>'//api.niconico.in/v1/dplayer/danmaku?m_id='.md5(self::getUrl().$id).'&token='.md5(md5(self::getUrl().$id)+date('Ymd',time())),
-            'add'=>'//api.niconico.in/v1/dplayer/danmaku?m_id='.md5(self::getUrl().$id).'&token='.md5(md5(self::getUrl().$id)+date('Ymd',time())),
+            'get'=>'//api.niconico.in/v1/dplayer/danmaku?m_id='.md5($id).'&token='.md5(md5($id)+date('Ymd',time())),
+            'add'=>'//api.niconico.in/v1/dplayer/danmaku?m_id='.md5($id).'&token='.md5(md5($id)+date('Ymd',time())),
         );
         $data['danmaku'] = ($atts['danmu']!='false') ? $danmaku : null;
         //加入头部数组
@@ -145,20 +144,6 @@ EOF;
 <script>dPlayerOptions.push({$js});</script>
 EOF;
         return $playerCode;
-    }
-
-    /**
-     * 获取一个唯一的id以区分各个播放器实例
-     * @return number
-     */
-    public static function getUniqueId()
-    {
-        return self::$playerID++;
-    }
-
-    public function getUrl(){
-        $url = $_SERVER['HTTP_HOST'].$_SERVER['PHP_SELF'];
-        return $url;
     }
 
     public static function config(Typecho_Widget_Helper_Form $form){}

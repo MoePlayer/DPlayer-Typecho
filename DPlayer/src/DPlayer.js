@@ -107,6 +107,37 @@
                         <source src="${this.option.video.url}" type="video/mp4">
                     </video>
                     <div class="dplayer-danmaku"></div>
+                    <div class="dplayer-bezel">
+                        <span class="dplayer-bezel-icon"></span>
+                        <span class="diplayer-loading-icon">
+                            <svg height="100%" version="1.1" viewBox="0 0 22 22" width="100%">
+                                <svg x="7" y="1">
+                                    <circle class="diplayer-loading-dot diplayer-loading-dot-0" cx="4" cy="4" r="2"></circle>
+                                </svg>
+                                <svg x="11" y="3">
+                                    <circle class="diplayer-loading-dot diplayer-loading-dot-1" cx="4" cy="4" r="2"></circle>
+                                </svg>
+                                <svg x="13" y="7">
+                                    <circle class="diplayer-loading-dot diplayer-loading-dot-2" cx="4" cy="4" r="2"></circle>
+                                </svg>
+                                <svg x="11" y="11">
+                                    <circle class="diplayer-loading-dot diplayer-loading-dot-3" cx="4" cy="4" r="2"></circle>
+                                </svg>
+                                <svg x="7" y="13">
+                                    <circle class="diplayer-loading-dot diplayer-loading-dot-4" cx="4" cy="4" r="2"></circle>
+                                </svg>
+                                <svg x="3" y="11">
+                                    <circle class="diplayer-loading-dot diplayer-loading-dot-5" cx="4" cy="4" r="2"></circle>
+                                </svg>
+                                <svg x="1" y="7">
+                                    <circle class="diplayer-loading-dot diplayer-loading-dot-6" cx="4" cy="4" r="2"></circle>
+                                </svg>
+                                <svg x="3" y="3">
+                                    <circle class="diplayer-loading-dot diplayer-loading-dot-7" cx="4" cy="4" r="2"></circle>
+                                </svg>
+                            </svg>
+                        </span>
+                    </div>
                 </div>
                 <div class="dplayer-controller-mask"></div>
                 <div class="dplayer-controller">
@@ -214,11 +245,18 @@
     
             // get this audio object
             this.audio = this.element.getElementsByClassName('dplayer-video')[0];
-    
+            window.audio = this.audio // Todo
+
+            this.bezel = this.element.getElementsByClassName('dplayer-bezel-icon')[0];
+            this.bezel.addEventListener('animationend', () => {
+                this.bezel.classList.remove('dplayer-bezel-transition');
+            });
+
             this.ptime = this.element.getElementsByClassName('dplayer-ptime')[0];
     
             // play and pause button
             this.playButton = this.element.getElementsByClassName('dplayer-play-icon')[0];
+            this.shouldpause = true;
             this.toggle = () => {
                 if (this.audio.paused) {
                     this.play();
@@ -291,10 +329,29 @@
                     }
                 }
             });
-    
+
+            let lastPlayPos = 0;
+            let currentPlayPos = 0;
+            let bufferingDetected = false;
             this.setTime = () => {
                 if (this.option.danmaku) {
                     this.playedTime = setInterval(() => {
+                        // whether the video is buffering
+                        currentPlayPos = this.audio.currentTime;
+                        if (!bufferingDetected
+                            && currentPlayPos < (lastPlayPos + 0.01)
+                            && !this.audio.paused) {
+                            this.element.classList.add('dplayer-loading');
+                            bufferingDetected = true
+                        }
+                        if (bufferingDetected
+                            && currentPlayPos > (lastPlayPos + 0.01)
+                            && !this.audio.paused) {
+                            this.element.classList.remove('dplayer-loading');
+                            bufferingDetected = false
+                        }
+                        lastPlayPos = currentPlayPos;
+
                         this.updateBar('played', this.audio.currentTime / this.audio.duration, 'width');
                         this.ptime.innerHTML = this.secondToTime(this.audio.currentTime);
                         this.trigger('playing');
@@ -308,6 +365,22 @@
                 }
                 else {
                     this.playedTime = setInterval(() => {
+                        // whether the video is buffering
+                        currentPlayPos = this.audio.currentTime;
+                        if (!bufferingDetected
+                            && currentPlayPos < (lastPlayPos + 0.01)
+                            && !this.audio.paused) {
+                            this.element.classList.add('dplayer-loading');
+                            bufferingDetected = true
+                        }
+                        if (bufferingDetected
+                            && currentPlayPos > (lastPlayPos + 0.01)
+                            && !this.audio.paused) {
+                            this.element.classList.remove('dplayer-loading');
+                            bufferingDetected = false
+                        }
+                        lastPlayPos = currentPlayPos;
+
                         this.updateBar('played', this.audio.currentTime / this.audio.duration, 'width');
                         this.ptime.innerHTML = this.secondToTime(this.audio.currentTime);
                         this.trigger('playing');
@@ -958,8 +1031,13 @@
          */
         play() {
             if (this.audio.paused) {
+                this.shouldpause = false;
+
+                this.bezel.innerHTML = this.getSVG('play');
+                this.bezel.classList.add('dplayer-bezel-transition');
+
                 this.playButton.innerHTML = this.getSVG('pause');
-    
+
                 this.audio.play();
                 if (this.playedTime) {
                     clearInterval(this.playedTime);
@@ -974,7 +1052,13 @@
          * Pause music
          */
         pause() {
-            if (!this.audio.paused || this.ended) {
+            if (!this.shouldpause || this.ended) {
+                this.shouldpause = true;
+                this.element.classList.remove('dplayer-loading');
+
+                this.bezel.innerHTML = this.getSVG('pause');
+                this.bezel.classList.add('dplayer-bezel-transition');
+
                 this.ended = false;
                 this.playButton.innerHTML = this.getSVG('play');
                 this.audio.pause();

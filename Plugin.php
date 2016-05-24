@@ -144,7 +144,7 @@ EOF;
         $danmaku = array(
             'id' => md5($id),
             'token' => md5(md5($id) . date('YmdH', time())),
-            'api' => '//api.niconico.in/v1/dplayer/danmaku',
+            'api' => '//danmaku.daoapp.io/dplayer/danmaku',
         );
         $data['danmaku'] = ($atts['danmu'] != 'false') ? $danmaku : null;
         //加入头部数组

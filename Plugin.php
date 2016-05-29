@@ -44,7 +44,7 @@ class DPlayer_Plugin implements Typecho_Plugin_Interface
      */
     public static function playerCss()
     {
-        $url = Helper::options()->pluginUrl . '/DPlayer/DPlayer/dist';
+        $url = Helper::options()->pluginUrl . '/DPlayer/player';
         echo '<link rel="stylesheet" type="text/css" href="' . $url . '/DPlayer.min.css" />
         <script>var dPlayers = [];var dPlayerOptions = [];</script>';
     }
@@ -54,7 +54,7 @@ class DPlayer_Plugin implements Typecho_Plugin_Interface
      */
     public static function playerJs()
     {
-        $url = Helper::options()->pluginUrl . '/DPlayer/DPlayer/dist';
+        $url = Helper::options()->pluginUrl . '/DPlayer/player';
         echo <<<EOF
 <script type="text/javascript" src="$url/DPlayer.min.js"></script>
 <script>

@@ -135,7 +135,7 @@ EOF;
         );
         //自动播放
         $data['autoplay'] = ($atts['autoplay'] == 'true') ? true : false;
-        $data['theme'] = $atts['theme'] ? $atts['autoplay'] : $theme;
+        $data['theme'] = $atts['theme'] ? $atts['theme'] : $theme;
         //输出代码
         $playerCode = '<div id="player' . $id . '" class="dplayer">';
         $playerCode .= "</div>\n";

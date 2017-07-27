@@ -1,8 +1,5 @@
-## DPlayer-for-typecho
+## DPlayer-Typecho
 [DPlayer](https://github.com/DIYgod/DPlayer) for typecho
-
-### 声明
-部分代码参考 [https://github.com/zgq354/APlayer-Typecho-Plugin](https://github.com/zgq354/APlayer-Typecho-Plugin)
 
 ### 使用方式
 下载后将文件夹名改为DPlayer上传启用即可

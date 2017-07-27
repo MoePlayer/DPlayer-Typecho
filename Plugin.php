@@ -44,7 +44,11 @@ class DPlayer_Plugin implements Typecho_Plugin_Interface
      */
     public static function playerHeader()
     {
-        echo '<script>var dPlayers = [];var dPlayerOptions = [];</script>';
+        $url = Helper::options()->pluginUrl . '/DPlayer';
+        echo <<<EOF
+<link rel="stylesheet" type="text/css" href="$url/dplayer/dist/DPlayer.min.css" />
+<script>var dPlayers = [];var dPlayerOptions = [];</script>
+EOF;
     }
 
     /**
@@ -54,18 +58,19 @@ class DPlayer_Plugin implements Typecho_Plugin_Interface
     {
         $url = Helper::options()->pluginUrl . '/DPlayer';
         if (Typecho_Widget::widget('Widget_Options')->plugin('DPlayer')->hls) {
-        	echo "<script type=\"text/javascript\" src=\"$url/plugin/hls.min.js\"></script>\n";
+            echo "<script type=\"text/javascript\" src=\"$url/dplayer/plugin/hls.min.js\"></script>\n";
         }
         if (Typecho_Widget::widget('Widget_Options')->plugin('DPlayer')->flv) {
-        	echo "<script type=\"text/javascript\" src=\"$url/plugin/flv.min.js\"></script>\n";
+            echo "<script type=\"text/javascript\" src=\"$url/dplayer/plugin/flv.min.js\"></script>\n";
         }
         echo <<<EOF
-<script type="text/javascript" src="$url/dist/DPlayer.min.js"></script>
+<script type="text/javascript" src="$url/dplayer/dist/DPlayer.min.js"></script>
 <script>
 var len = dPlayerOptions.length;
 for(var i=0;i<len;i++){
 	dPlayers[i] = new DPlayer({
 		element: document.getElementById('player' + dPlayerOptions[i]['id']),
+		screenshot: false,
         autoplay: dPlayerOptions[i]['autoplay'],
         video: dPlayerOptions[i]['video'],
         theme: dPlayerOptions[i]['theme'],
@@ -152,7 +157,7 @@ EOF;
         );
 
         if (isset($atts['addition'])) {
-        	$danmaku['addition'] = array($atts['addition']);
+            $danmaku['addition'] = array($atts['addition']);
         }
 
         $data['danmaku'] = (isset($atts['danmu']) && $atts['danmu'] == 'false') ? null : $danmaku;
@@ -172,8 +177,8 @@ EOF;
         $api = new Typecho_Widget_Helper_Form_Element_Text(
             'api', null, 'https://api.prprpr.me/dplayer/',
             _t('弹幕服务器地址'), _t('用于保存视频弹幕，默认为 https://api.prprpr.me/dplayer/'));
-        $hls = new Typecho_Widget_Helper_Form_Element_Radio('hls',array('0' => _t('不开启HLS支持'),'1' => _t('开启HLS支持')),'0',_t('HLS支持'),_t("开启后可解析 m3u8 格式视频"));
-        $flv = new Typecho_Widget_Helper_Form_Element_Radio('flv',array('0' => _t('不开启FLV支持'),'1' => _t('开启FLV支持')),'0',_t('FLV支持'),_t("开启后可解析 flv 格式视频"));
+        $hls = new Typecho_Widget_Helper_Form_Element_Radio('hls', array('0' => _t('不开启HLS支持'), '1' => _t('开启HLS支持')), '0', _t('HLS支持'), _t("开启后可解析 m3u8 格式视频"));
+        $flv = new Typecho_Widget_Helper_Form_Element_Radio('flv', array('0' => _t('不开启FLV支持'), '1' => _t('开启FLV支持')), '0', _t('FLV支持'), _t("开启后可解析 flv 格式视频"));
         $form->addInput($theme);
         $form->addInput($api);
         $form->addInput($hls);

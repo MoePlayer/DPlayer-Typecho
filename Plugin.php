@@ -6,7 +6,7 @@ if (!defined('__TYPECHO_ROOT_DIR__')) exit;
  *
  * @package DPlayer
  * @author Volio
- * @version 1.0.0
+ * @version 1.0.1
  * @link http://github.com/volio/DPlayer-for-typecho
  */
 class DPlayer_Plugin implements Typecho_Plugin_Interface
@@ -46,7 +46,7 @@ class DPlayer_Plugin implements Typecho_Plugin_Interface
     {
         $url = Helper::options()->pluginUrl . '/DPlayer';
         echo <<<EOF
-<link rel="stylesheet" type="text/css" href="$url/dplayer/dist/DPlayer.min.css" />
+<link rel="stylesheet" type="text/css" href="$url/dist/DPlayer.min.css" />
 <script>var dPlayers = [];var dPlayerOptions = [];</script>
 EOF;
     }
@@ -58,26 +58,14 @@ EOF;
     {
         $url = Helper::options()->pluginUrl . '/DPlayer';
         if (Typecho_Widget::widget('Widget_Options')->plugin('DPlayer')->hls) {
-            echo "<script type=\"text/javascript\" src=\"$url/dplayer/plugin/hls.min.js\"></script>\n";
+            echo "<script type=\"text/javascript\" src=\"$url/plugin/hls.min.js\"></script>\n";
         }
         if (Typecho_Widget::widget('Widget_Options')->plugin('DPlayer')->flv) {
-            echo "<script type=\"text/javascript\" src=\"$url/dplayer/plugin/flv.min.js\"></script>\n";
+            echo "<script type=\"text/javascript\" src=\"$url/plugin/flv.min.js\"></script>\n";
         }
         echo <<<EOF
-<script type="text/javascript" src="$url/dplayer/dist/DPlayer.min.js"></script>
-<script>
-var len = dPlayerOptions.length;
-for(var i=0;i<len;i++){
-	dPlayers[i] = new DPlayer({
-		element: document.getElementById('player' + dPlayerOptions[i]['id']),
-		screenshot: false,
-        autoplay: dPlayerOptions[i]['autoplay'],
-        video: dPlayerOptions[i]['video'],
-        theme: dPlayerOptions[i]['theme'],
-        danmaku: dPlayerOptions[i]['danmaku'],
-	});
-}
-</script>
+<script type="text/javascript" src="$url/dist/DPlayer.min.js"></script>
+<script type="text/javascript" src="$url/dist/init-dplayer.js"></script>
 EOF;
     }
 
@@ -128,39 +116,59 @@ EOF;
         //播放器id
         $id = md5($_SERVER['HTTP_HOST'] . $atts['url']);
 
-        $result = array(
-            'url' => isset($atts['url']) ? $atts['url'] : '',
-            'pic' => isset($atts['pic']) ? $atts['pic'] : ''
-        );
         //播放器设置
         $theme = Typecho_Widget::widget('Widget_Options')->plugin('DPlayer')->theme;
         $api = Typecho_Widget::widget('Widget_Options')->plugin('DPlayer')->api;
         if (!$theme) $theme = '#FADFA3';
-        //播放器默认属性
-        $data = array(
-            'id' => $id,
-            'autoplay' => false,
-            'theme' => $theme
-        );
-        //自动播放
-        $data['autoplay'] = (isset($atts['autoplay']) && $atts['autoplay'] == 'true') ? true : false;
-        $data['theme'] = isset($atts['theme']) ? $atts['theme'] : $theme;
+
         //输出代码
         $playerCode = '<div id="player' . $id . '" class="dplayer">';
         $playerCode .= "</div>\n";
-        $data['video'] = $result;
+
+        $video = array(
+            'url' => isset($atts['url']) ? $atts['url'] : '',
+            'pic' => isset($atts['pic']) ? $atts['pic'] : '',
+            'type' => isset($atts['type']) ? $atts['type'] : 'auto',
+            'thumbnails' => isset($atts['thumbnails']) ? $atts['thumbnails'] : '',
+        );
         //弹幕部分配置文件
+        $subtitle = array(
+            'url' => isset($atts['subtitleurl']) ? $atts['subtitleurl'] : '',
+            'type' => isset($atts['subtitletype']) ? $atts['subtitletype'] : 'webvtt',
+            'fontSize' => isset($atts['subtitlefontsize']) ? $atts['subtitlefontsize'] : '25px',
+            'bottom' => isset($atts['subtitlebottom']) ? $atts['subtitlebottom'] : '10%',
+            'color' => isset($atts['subtitlecolor']) ? $atts['subtitlecolor'] : '#b7daff',
+        );
         $danmaku = array(
             'id' => md5($id),
-            'token' => md5(md5($id)),
-            'api' => $api
+            'api' => $api,
+            'maximum' => isset($atts['maximum']) ? $atts['maximum'] : 1000,
+            'addition' => isset($atts['addition']) ? array($atts['addition']) : null,
+            'user' => isset($atts['user']) ? $atts['user'] : 'DIYgod',
+            'bottom' => isset($atts['bottom']) ? $atts['bottom'] : '15%',
+            'unlimited' => true,
         );
 
-        if (isset($atts['addition'])) {
-            $danmaku['addition'] = array($atts['addition']);
-        }
-
-        $data['danmaku'] = (isset($atts['danmu']) && $atts['danmu'] == 'false') ? null : $danmaku;
+        //播放器默认属性
+        $data = array(
+            'id' => $id,
+            'live' => false,
+            'autoplay' => false,
+            'theme' => isset($atts['theme']) ? $atts['theme'] : '#FADFA3',
+            'loop' => false,
+            'screenshot' => false,
+            'hotkey' => true,
+            'preload' => 'metadata',
+            'lang' => isset($atts['lang']) ? $atts['lang'] : 'zh-cn',
+            'logo' => isset($atts['logo']) ? $atts['logo'] : null,
+            'volume' => isset($atts['volume']) ? $atts['volume'] : 0.7,
+            'mutex' => true,
+        );
+        $data['video'] = $video;
+        $data['danmaku'] = (isset($atts['danmu']) && $atts['danmu'] != 'false') ? $danmaku : null;
+        $data['subtitle'] = isset($atts['subtitleurl']) ? $subtitle : null;
+        $data['autoplay'] = (isset($atts['autoplay']) && $atts['autoplay'] == 'true') ? true : false;
+        $data['theme'] = isset($atts['theme']) ? $atts['theme'] : $theme;
         //加入头部数组
         $js = json_encode($data);
         $playerCode .= <<<EOF
@@ -175,8 +183,8 @@ EOF;
             'theme', null, '#FADFA3',
             _t('默认主题颜色'), _t('播放器默认的主题颜色，如 #372e21、#75c、red、blue，该设定会被[dplayer]标签中的theme属性覆盖，默认为 #FADFA3'));
         $api = new Typecho_Widget_Helper_Form_Element_Text(
-            'api', null, 'https://api.prprpr.me/dplayer/',
-            _t('弹幕服务器地址'), _t('用于保存视频弹幕，默认为 https://api.prprpr.me/dplayer/'));
+            'api', null, 'https://api.prprpr.me/dplayer/v3/',
+            _t('弹幕服务器地址'), _t('用于保存视频弹幕，默认为 https://api.prprpr.me/dplayer/v3/'));
         $hls = new Typecho_Widget_Helper_Form_Element_Radio('hls', array('0' => _t('不开启HLS支持'), '1' => _t('开启HLS支持')), '0', _t('HLS支持'), _t("开启后可解析 m3u8 格式视频"));
         $flv = new Typecho_Widget_Helper_Form_Element_Radio('flv', array('0' => _t('不开启FLV支持'), '1' => _t('开启FLV支持')), '0', _t('FLV支持'), _t("开启后可解析 flv 格式视频"));
         $form->addInput($theme);

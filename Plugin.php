@@ -25,6 +25,8 @@ class DPlayer_Plugin implements Typecho_Plugin_Interface
         Typecho_Plugin::factory('Widget_Abstract_Contents')->excerptEx = array('DPlayer_Plugin', 'playerparse');
         Typecho_Plugin::factory('Widget_Archive')->header = array('DPlayer_Plugin', 'playerHeader');
         Typecho_Plugin::factory('Widget_Archive')->footer = array('DPlayer_Plugin', 'playerFooter');
+        Typecho_Plugin::factory('admin/write-post.php')->bottom = array('DPlayer_Plugin', 'addButton');
+        Typecho_Plugin::factory('admin/write-page.php')->bottom = array('DPlayer_Plugin', 'addButton');
     }
 
     /**
@@ -175,6 +177,12 @@ EOF;
 <script>dPlayerOptions.push({$js});</script>
 EOF;
         return $playerCode;
+    }
+
+    public static function addButton() 
+    {
+        $dir = Helper::options()->pluginUrl.'/DPlayer/dist/editor.js';
+        echo "<script type=\"text/javascript\" src=\"{$dir}\"></script>";
     }
 
     public static function config(Typecho_Widget_Helper_Form $form)

@@ -1,9 +1,9 @@
 $(function () {
     if ($('#wmd-button-row').length > 0) {
-        $('#wmd-button-row').append('<li class="wmd-spacer wmd-spacer1" id="wmd-spacer5"></li><li class="wmd-button" id="wmd-meting-button" style="" title="插入音乐"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAABGUlEQVQ4T6XTvyuFURgH8M9lkTKYlMGiRDKIxSQDkcFgYVAmi8WPwY+Uxa8FhWQmWdgMiAxmf4BYpFAGSRkY6K1z6tJ1vTdnfc/zOU/P830z/nkyoX4GIyjHHKrQjyXUoh3raEQT9nGDjQQowjk6cYcBnOIJHbjCY4DecYtK7KIrAUqwiNHweh16sRa+DWEbD5jAIS5QgekIJB0cB3kwgNXowTLq0YpNNKMB92iLwALGCpznSnYHP4EyvP4B5gX6wlaGcfkL9Cewh0/sYDIMMdtKBcSCN4xjK0tIDXyE6c/ipVAg2Xmynescc/jWQQxSvNeCUpzl2cQqpmKUj0JsC4nCSRL/+DMl66rBcwqhGN04wHwEUtTlvvIFs5ZDZeiythMAAAAASUVORK5CYII="/></li>');
+        $('#wmd-button-row').append('<li class="wmd-spacer wmd-spacer1" id="wmd-spacer5"></li><li class="wmd-button" id="wmd-dplayer-button" style="" title="插入视频"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAABGUlEQVQ4T6XTvyuFURgH8M9lkTKYlMGiRDKIxSQDkcFgYVAmi8WPwY+Uxa8FhWQmWdgMiAxmf4BYpFAGSRkY6K1z6tJ1vTdnfc/zOU/P830z/nkyoX4GIyjHHKrQjyXUoh3raEQT9nGDjQQowjk6cYcBnOIJHbjCY4DecYtK7KIrAUqwiNHweh16sRa+DWEbD5jAIS5QgekIJB0cB3kwgNXowTLq0YpNNKMB92iLwALGCpznSnYHP4EyvP4B5gX6wlaGcfkL9Cewh0/sYDIMMdtKBcSCN4xjK0tIDXyE6c/ipVAg2Xmynescc/jWQQxSvNeCUpzl2cQqpmKUj0JsC4nCSRL/+DMl66rBcwqhGN04wHwEUtTlvvIFs5ZDZeiythMAAAAASUVORK5CYII="/></li>');
     }
 
-    $(document).on('click', '#wmd-meting-button', function () {
+    $(document).on('click', '#wmd-dplayer-button', function () {
         $('body').append(
             '<div id="DPlayer-Panel">' +
             '<div class="wmd-prompt-background" style="position: absolute; top: 0px; z-index: 1000; opacity: 0.5; height: 875px; left: 0px; width: 100%;"></div>' +

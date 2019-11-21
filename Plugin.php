@@ -6,7 +6,7 @@ if (!defined('__TYPECHO_ROOT_DIR__')) exit;
  *
  * @package DPlayer
  * @author Volio
- * @version 1.0.1
+ * @version 1.0.3
  * @link http://github.com/volio/DPlayer-for-typecho
  */
 class DPlayer_Plugin implements Typecho_Plugin_Interface
@@ -17,16 +17,15 @@ class DPlayer_Plugin implements Typecho_Plugin_Interface
      *
      * @access public
      * @return void
-     * @throws Typecho_Plugin_Exception
      */
     public static function activate()
     {
-        Typecho_Plugin::factory('Widget_Abstract_Contents')->contentEx = array('DPlayer_Plugin', 'playerparse');
-        Typecho_Plugin::factory('Widget_Abstract_Contents')->excerptEx = array('DPlayer_Plugin', 'playerparse');
-        Typecho_Plugin::factory('Widget_Archive')->header = array('DPlayer_Plugin', 'playerHeader');
-        Typecho_Plugin::factory('Widget_Archive')->footer = array('DPlayer_Plugin', 'playerFooter');
-        Typecho_Plugin::factory('admin/write-post.php')->bottom = array('DPlayer_Plugin', 'addButton');
-        Typecho_Plugin::factory('admin/write-page.php')->bottom = array('DPlayer_Plugin', 'addButton');
+        Typecho_Plugin::factory('Widget_Abstract_Contents')->contentEx = ['DPlayer_Plugin', 'parsePlayer'];
+        Typecho_Plugin::factory('Widget_Abstract_Contents')->excerptEx = ['DPlayer_Plugin', 'parsePlayer'];
+        Typecho_Plugin::factory('Widget_Archive')->header = ['DPlayer_Plugin', 'playerHeader'];
+        Typecho_Plugin::factory('Widget_Archive')->footer = ['DPlayer_Plugin', 'playerFooter'];
+        Typecho_Plugin::factory('admin/write-post.php')->bottom = ['DPlayer_Plugin', 'addEditorButton'];
+        Typecho_Plugin::factory('admin/write-page.php')->bottom = ['DPlayer_Plugin', 'addEditorButton'];
     }
 
     /**
@@ -35,7 +34,6 @@ class DPlayer_Plugin implements Typecho_Plugin_Interface
      * @static
      * @access public
      * @return void
-     * @throws Typecho_Plugin_Exception
      */
     public static function deactivate()
     {
@@ -55,6 +53,7 @@ EOF;
 
     /**
      * 插入底部代码
+     * @throws Typecho_Exception
      */
     public static function playerFooter()
     {
@@ -75,25 +74,28 @@ EOF;
      * 内容标签替换
      *
      * @param string $content
+     * @param $widget
+     * @param $lastResult
      * @return string
      */
-    public static function playerparse($content, $widget, $lastResult)
+    public static function parsePlayer($content, $widget, $lastResult)
     {
         $content = empty($lastResult) ? $content : $lastResult;
         if ($widget instanceof Widget_Archive) {
             if (false === strpos($content, '[')) {
                 return $content;
             }
-            $pattern = self::get_shortcode_regex(array('dplayer'));
-            $content = preg_replace_callback("/$pattern/", array('DPlayer_Plugin', 'parseCallback'), $content);
+            $pattern = self::get_shortcode_regex(['dplayer']);
+            $content = preg_replace_callback("/$pattern/", ['DPlayer_Plugin', 'parseCallback'], $content);
         }
         return $content;
     }
 
     /**
      * 回调解析
-     * @param unknown $matches
+     * @param $matches
      * @return string
+     * @throws Typecho_Exception
      */
     public static function parseCallback($matches)
     {
@@ -134,25 +136,25 @@ EOF;
             'thumbnails' => isset($atts['thumbnails']) ? $atts['thumbnails'] : '',
         );
         //弹幕部分配置文件
-        $subtitle = array(
+        $subtitle = [
             'url' => isset($atts['subtitleurl']) ? $atts['subtitleurl'] : '',
             'type' => isset($atts['subtitletype']) ? $atts['subtitletype'] : 'webvtt',
             'fontSize' => isset($atts['subtitlefontsize']) ? $atts['subtitlefontsize'] : '25px',
             'bottom' => isset($atts['subtitlebottom']) ? $atts['subtitlebottom'] : '10%',
             'color' => isset($atts['subtitlecolor']) ? $atts['subtitlecolor'] : '#b7daff',
-        );
-        $danmaku = array(
+        ];
+        $danmaku = [
             'id' => $id,
             'api' => $api,
             'maximum' => isset($atts['maximum']) ? $atts['maximum'] : 1000,
-            'addition' => isset($atts['addition']) ? array($atts['addition']) : null,
+            'addition' => isset($atts['addition']) ? [$atts['addition']] : null,
             'user' => isset($atts['user']) ? $atts['user'] : 'DIYgod',
             'bottom' => isset($atts['bottom']) ? $atts['bottom'] : '15%',
             'unlimited' => true,
-        );
+        ];
 
         //播放器默认属性
-        $data = array(
+        $data = [
             'id' => $id,
             'live' => false,
             'autoplay' => false,
@@ -165,7 +167,7 @@ EOF;
             'logo' => isset($atts['logo']) ? $atts['logo'] : null,
             'volume' => isset($atts['volume']) ? $atts['volume'] : 0.7,
             'mutex' => true,
-        );
+        ];
         $data['video'] = $video;
         $data['danmaku'] = (isset($atts['danmu']) && $atts['danmu'] == 'true') ? $danmaku : null;
         $data['subtitle'] = isset($atts['subtitleurl']) ? $subtitle : null;
@@ -179,9 +181,9 @@ EOF;
         return $playerCode;
     }
 
-    public static function addButton() 
+    public static function addEditorButton()
     {
-        $dir = Helper::options()->pluginUrl.'/DPlayer/dist/editor.js';
+        $dir = Helper::options()->pluginUrl . '/DPlayer/dist/editor.js';
         echo "<script type=\"text/javascript\" src=\"{$dir}\"></script>";
     }
 

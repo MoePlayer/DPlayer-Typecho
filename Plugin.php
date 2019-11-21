@@ -116,7 +116,7 @@ EOF;
         //[dplayer]标签的属性，类型为array
         $atts = self::shortcode_parse_atts($attr);
         //播放器id
-        $id = md5($_SERVER['HTTP_HOST'] . $atts['url']);
+        $id = md5(isset($atts['url']) ? $atts['url'] : 'default id');
 
         //播放器设置
         $theme = Typecho_Widget::widget('Widget_Options')->plugin('DPlayer')->theme;
@@ -142,7 +142,7 @@ EOF;
             'color' => isset($atts['subtitlecolor']) ? $atts['subtitlecolor'] : '#b7daff',
         );
         $danmaku = array(
-            'id' => md5($id),
+            'id' => $id,
             'api' => $api,
             'maximum' => isset($atts['maximum']) ? $atts['maximum'] : 1000,
             'addition' => isset($atts['addition']) ? array($atts['addition']) : null,
@@ -167,7 +167,7 @@ EOF;
             'mutex' => true,
         );
         $data['video'] = $video;
-        $data['danmaku'] = (isset($atts['danmu']) && $atts['danmu'] != 'false') ? $danmaku : null;
+        $data['danmaku'] = (isset($atts['danmu']) && $atts['danmu'] == 'true') ? $danmaku : null;
         $data['subtitle'] = isset($atts['subtitleurl']) ? $subtitle : null;
         $data['autoplay'] = (isset($atts['autoplay']) && $atts['autoplay'] == 'true') ? true : false;
         $data['theme'] = isset($atts['theme']) ? $atts['theme'] : $theme;

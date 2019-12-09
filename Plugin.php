@@ -6,7 +6,7 @@ if (!defined('__TYPECHO_ROOT_DIR__')) exit;
  *
  * @package DPlayer
  * @author Volio
- * @version 1.0.3
+ * @version 1.0.4
  * @link http://github.com/volio/DPlayer-for-typecho
  */
 class DPlayer_Plugin implements Typecho_Plugin_Interface
@@ -46,8 +46,8 @@ class DPlayer_Plugin implements Typecho_Plugin_Interface
     {
         $url = Helper::options()->pluginUrl . '/DPlayer';
         echo <<<EOF
-<link rel="stylesheet" type="text/css" href="$url/dist/DPlayer.min.css" />
-<script>var dPlayers = [];var dPlayerOptions = [];</script>
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/dplayer/dist/DPlayer.min.css" />
+<script>var dPlayerOptions = [];</script>
 EOF;
     }
 
@@ -65,8 +65,8 @@ EOF;
             echo "<script type=\"text/javascript\" src=\"$url/plugin/flv.min.js\"></script>\n";
         }
         echo <<<EOF
-<script type="text/javascript" src="$url/dist/DPlayer.min.js"></script>
-<script type="text/javascript" src="$url/dist/init-dplayer.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/dplayer/dist/DPlayer.min.js"></script>
+<script type="text/javascript" src="$url/dist/util.js"></script>
 EOF;
     }
 

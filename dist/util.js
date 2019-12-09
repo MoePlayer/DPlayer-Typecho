@@ -1,6 +1,6 @@
 var len = dPlayerOptions.length;
 var dPlayers = [];
-for(var i=0;i<len;i++){
+for (var i = 0; i < len; i++) {
     dPlayers.push(new DPlayer({
         container: document.getElementById('player' + dPlayerOptions[i]['id']),
         autoplay: dPlayerOptions[i]['autoplay'],

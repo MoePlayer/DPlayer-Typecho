@@ -4,7 +4,7 @@
 ### 使用方式
 下载后将文件夹名改为DPlayer上传启用即可
 
-默认不自动播放，弹幕开启
+默认不自动播放，弹幕不开启
 ```
 [dplayer url="http://xxx.com/xxx.mp4" pic="http://xxx.com/xxx.jpg"/]
 ```

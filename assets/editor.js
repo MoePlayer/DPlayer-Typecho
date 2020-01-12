@@ -6,14 +6,14 @@ $(function () {
     $(document).on('click', '#wmd-dplayer-button', function () {
         $('body').append(
             '<div id="DPlayer-Panel">' +
-            '<div class="wmd-prompt-background" style="position: absolute; top: 0px; z-index: 1000; opacity: 0.5; height: 875px; left: 0px; width: 100%;"></div>' +
+            '<div class="wmd-prompt-background" style="position: absolute; top: 0; z-index: 1000; opacity: 0.5; height: 875px; left: 0; width: 100%;"></div>' +
             '<div class="wmd-prompt-dialog">' +
             '<div>' +
             '<p><b>插入视频</b></p>' +
             '<p>在下方输入参数</p>' +
-            '<p><input type="text" id="DP-url" value="" placeholder="链接"></input></p>' +
-            '<p><input type="text" id="DP-pic" value="" placeholder="封面图"></input></p>' +
-            '<p><input type="text" id="DP-addition" value="" placeholder="额外弹幕源"></input></p>' +
+            '<p><input type="text" id="DP-url" value="" placeholder="链接"/></p>' +
+            '<p><input type="text" id="DP-pic" value="" placeholder="封面图"/></p>' +
+            '<p><input type="text" id="DP-addition" value="" placeholder="额外弹幕源"/></p>' +
             '<p><input type="checkbox" id="DP-danmu" checked>开启弹幕</input></p>' +
             '<p><input type="checkbox" id="DP-autoplay">自动播放</input></p>' +
             '</div>' +
@@ -31,40 +31,38 @@ $(function () {
     });
     //ok
     $(document).on('click', '#ok', function () {
-        var DP_url = document.getElementById('DP-url').value,
-            DP_pic = document.getElementById('DP-pic').value,
-            DP_danmu = document.getElementById('DP-danmu').checked ? true : false,
-            DP_autoplay = document.getElementById('DP-autoplay').checked ? true : false,
-            DP_addition = document.getElementById('DP-addition').value;
-        var tag = '[dplayer url="' + DP_url + '" pic="' + DP_pic + '" ';
-        if (!DP_danmu) tag += 'danmu="' + DP_danmu + '" ';
-        if (DP_autoplay) tag += 'autoplay="' + DP_autoplay + '" ';
-        if (DP_addition) tag += 'addition="' + DP_addition + '" ';
+        var url = document.getElementById('DP-url').value,
+            pic = document.getElementById('DP-pic').value,
+            danmu = !!document.getElementById('DP-danmu').checked,
+            autoplay = !!document.getElementById('DP-autoplay').checked;
+        var tag = '[dplayer url="' + url + '" pic="' + pic + '" ';
+        if (!danmu) tag += 'danmu="' + danmu + '" ';
+        if (autoplay) tag += 'autoplay="' + autoplay + '" ';
         tag += '/]\n';
         
-        myField = document.getElementById('text');
+        var editor = document.getElementById('text');
 
         if (document.selection) {
-            myField.focus();
+            editor.focus();
             sel = document.selection.createRange();
             sel.text = tag;
-            myField.focus();
+            editor.focus();
         }
-        else if (myField.selectionStart || myField.selectionStart == '0') {
-            var startPos = myField.selectionStart;
-            var endPos = myField.selectionEnd;
+        else if (editor.selectionStart || editor.selectionStart === '0') {
+            var startPos = editor.selectionStart;
+            var endPos = editor.selectionEnd;
             var cursorPos = startPos;
-            myField.value = myField.value.substring(0, startPos)
+            editor.value = editor.value.substring(0, startPos)
                 + tag
-                + myField.value.substring(endPos, myField.value.length);
+                + editor.value.substring(endPos, myField.value.length);
             cursorPos += tag.length;
-            myField.focus();
-            myField.selectionStart = cursorPos;
-            myField.selectionEnd = cursorPos;
+            editor.focus();
+            editor.selectionStart = cursorPos;
+            editor.selectionEnd = cursorPos;
         }
         else {
-            myField.value += tag;
-            myField.focus();
+            editor.value += tag;
+            editor.focus();
         }
 
         $('#DPlayer-Panel').remove();

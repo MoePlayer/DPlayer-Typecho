@@ -6,8 +6,8 @@ if (!defined('__TYPECHO_ROOT_DIR__')) exit;
  *
  * @package DPlayer
  * @author Volio
- * @version 1.0.4
- * @link http://github.com/volio/DPlayer-for-typecho
+ * @version 1.1.0
+ * @link https://niconiconi.org
  */
 class DPlayer_Plugin implements Typecho_Plugin_Interface
 {
@@ -20,8 +20,8 @@ class DPlayer_Plugin implements Typecho_Plugin_Interface
      */
     public static function activate()
     {
-        Typecho_Plugin::factory('Widget_Abstract_Contents')->contentEx = ['DPlayer_Plugin', 'parsePlayer'];
-        Typecho_Plugin::factory('Widget_Abstract_Contents')->excerptEx = ['DPlayer_Plugin', 'parsePlayer'];
+        Typecho_Plugin::factory('Widget_Abstract_Contents')->contentEx = ['DPlayer_Plugin', 'replacePlayer'];
+        Typecho_Plugin::factory('Widget_Abstract_Contents')->excerptEx = ['DPlayer_Plugin', 'replacePlayer'];
         Typecho_Plugin::factory('Widget_Archive')->header = ['DPlayer_Plugin', 'playerHeader'];
         Typecho_Plugin::factory('Widget_Archive')->footer = ['DPlayer_Plugin', 'playerFooter'];
         Typecho_Plugin::factory('admin/write-post.php')->bottom = ['DPlayer_Plugin', 'addEditorButton'];
@@ -44,10 +44,8 @@ class DPlayer_Plugin implements Typecho_Plugin_Interface
      */
     public static function playerHeader()
     {
-        $url = Helper::options()->pluginUrl . '/DPlayer';
         echo <<<EOF
 <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/dplayer/dist/DPlayer.min.css" />
-<script>var dPlayerOptions = [];</script>
 EOF;
     }
 
@@ -66,29 +64,26 @@ EOF;
         }
         echo <<<EOF
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/dplayer/dist/DPlayer.min.js"></script>
-<script type="text/javascript" src="$url/dist/util.js"></script>
+<script type="text/javascript" src="$url/assets/player.js"></script>
 EOF;
     }
 
     /**
      * 内容标签替换
      *
-     * @param string $content
+     * @param $text
      * @param $widget
-     * @param $lastResult
+     * @param $last
      * @return string
      */
-    public static function parsePlayer($content, $widget, $lastResult)
+    public static function replacePlayer($text, $widget, $last)
     {
-        $content = empty($lastResult) ? $content : $lastResult;
+        $text = empty($last) ? $text : $last;
         if ($widget instanceof Widget_Archive) {
-            if (false === strpos($content, '[')) {
-                return $content;
-            }
             $pattern = self::get_shortcode_regex(['dplayer']);
-            $content = preg_replace_callback("/$pattern/", ['DPlayer_Plugin', 'parseCallback'], $content);
+            $text = preg_replace_callback("/$pattern/", ['DPlayer_Plugin', 'parseCallback'], $text);
         }
-        return $content;
+        return $text;
     }
 
     /**
@@ -114,76 +109,64 @@ EOF;
         }
         //还原转义后的html
         //[dplayer title=&quot;Test Abc&quot; artist=&quot;haha&quot; id=&quot;1234543&quot;/]
-        $attr = htmlspecialchars_decode($matches[3]);
+        $tag = htmlspecialchars_decode($matches[3]);
         //[dplayer]标签的属性，类型为array
-        $atts = self::shortcode_parse_atts($attr);
-        //播放器id
-        $id = md5(isset($atts['url']) ? $atts['url'] : 'default id');
+        $attrs = self::shortcode_parse_atts($tag);
+        return DPlayer_Plugin::parsePlayer($attrs);
+    }
 
+    public static function parsePlayer($attrs)
+    {
         //播放器设置
-        $theme = Typecho_Widget::widget('Widget_Options')->plugin('DPlayer')->theme;
+        $theme = Typecho_Widget::widget('Widget_Options')->plugin('DPlayer')->theme ?: '#FADFA3';
         $api = Typecho_Widget::widget('Widget_Options')->plugin('DPlayer')->api;
-        if (!$theme) $theme = '#FADFA3';
 
-        //输出代码
-        $playerCode = '<div id="player' . $id . '" class="dplayer">';
-        $playerCode .= "</div>\n";
-
-        $video = array(
-            'url' => isset($atts['url']) ? $atts['url'] : '',
-            'pic' => isset($atts['pic']) ? $atts['pic'] : '',
-            'type' => isset($atts['type']) ? $atts['type'] : 'auto',
-            'thumbnails' => isset($atts['thumbnails']) ? $atts['thumbnails'] : '',
-        );
-        //弹幕部分配置文件
-        $subtitle = [
-            'url' => isset($atts['subtitleurl']) ? $atts['subtitleurl'] : '',
-            'type' => isset($atts['subtitletype']) ? $atts['subtitletype'] : 'webvtt',
-            'fontSize' => isset($atts['subtitlefontsize']) ? $atts['subtitlefontsize'] : '25px',
-            'bottom' => isset($atts['subtitlebottom']) ? $atts['subtitlebottom'] : '10%',
-            'color' => isset($atts['subtitlecolor']) ? $atts['subtitlecolor'] : '#b7daff',
-        ];
-        $danmaku = [
-            'id' => $id,
-            'api' => $api,
-            'maximum' => isset($atts['maximum']) ? $atts['maximum'] : 1000,
-            'addition' => isset($atts['addition']) ? [$atts['addition']] : null,
-            'user' => isset($atts['user']) ? $atts['user'] : 'DIYgod',
-            'bottom' => isset($atts['bottom']) ? $atts['bottom'] : '15%',
-            'unlimited' => true,
-        ];
-
-        //播放器默认属性
-        $data = [
-            'id' => $id,
+        //播放器属性
+        $config = [
             'live' => false,
-            'autoplay' => false,
-            'theme' => isset($atts['theme']) ? $atts['theme'] : '#FADFA3',
-            'loop' => (isset($atts['loop']) && $atts['loop'] == 'true') ? true : false,
-            'screenshot' => (isset($atts['screenshot']) && $atts['screenshot'] == 'true') ? true : false,
+            'autoplay' => isset($attrs['autoplay']) && $attrs['autoplay'] == 'true',
+            'theme' => isset($attrs['theme']) ? $attrs['theme'] : $theme,
+            'loop' => isset($attrs['loop']) && $attrs['loop'] == 'true',
+            'screenshot' => isset($attrs['screenshot']) && $attrs['screenshot'] == 'true',
             'hotkey' => true,
             'preload' => 'metadata',
-            'lang' => isset($atts['lang']) ? $atts['lang'] : 'zh-cn',
-            'logo' => isset($atts['logo']) ? $atts['logo'] : null,
-            'volume' => isset($atts['volume']) ? $atts['volume'] : 0.7,
+            'lang' => isset($attrs['lang']) ? $attrs['lang'] : 'zh-cn',
+            'logo' => isset($attrs['logo']) ? $attrs['logo'] : null,
+            'volume' => isset($attrs['volume']) ? $attrs['volume'] : 0.7,
             'mutex' => true,
+            'video' => [
+                'url' => isset($attrs['url']) ? $attrs['url'] : null,
+                'pic' => isset($attrs['pic']) ? $attrs['pic'] : null,
+                'type' => isset($attrs['type']) ? $attrs['type'] : 'auto',
+                'thumbnails' => isset($attrs['thumbnails']) ? $attrs['thumbnails'] : null,
+            ],
         ];
-        $data['video'] = $video;
-        $data['danmaku'] = (isset($atts['danmu']) && $atts['danmu'] == 'true') ? $danmaku : null;
-        $data['subtitle'] = isset($atts['subtitleurl']) ? $subtitle : null;
-        $data['autoplay'] = (isset($atts['autoplay']) && $atts['autoplay'] == 'true') ? true : false;
-        $data['theme'] = isset($atts['theme']) ? $atts['theme'] : $theme;
-        //加入头部数组
-        $js = json_encode($data);
-        $playerCode .= <<<EOF
-<script>dPlayerOptions.push({$js});</script>
-EOF;
-        return $playerCode;
+        if (isset($attrs['danmu']) && $attrs['danmu'] == 'true') {
+            $config['danmaku'] = [
+                'id' => md5(isset($attrs['url']) ? $attrs['url'] : ''),
+                'api' => $api,
+                'maximum' => isset($attrs['maximum']) ? $attrs['maximum'] : 1000,
+                'user' => isset($attrs['user']) ? $attrs['user'] : 'DIYgod',
+                'bottom' => isset($attrs['bottom']) ? $attrs['bottom'] : '15%',
+                'unlimited' => true,
+            ];
+        }
+        if (isset($attrs['subtitle']) && $attrs['subtitle'] == 'true') {
+            $config['subtitle'] = [
+                'url' => isset($attrs['subtitleurl']) ? $attrs['subtitleurl'] : null,
+                'type' => isset($attrs['subtitletype']) ? $attrs['subtitletype'] : 'webvtt',
+                'fontSize' => isset($attrs['subtitlefontsize']) ? $attrs['subtitlefontsize'] : '25px',
+                'bottom' => isset($attrs['subtitlebottom']) ? $attrs['subtitlebottom'] : '10%',
+                'color' => isset($attrs['subtitlecolor']) ? $attrs['subtitlecolor'] : '#b7daff',
+            ];
+        }
+        $json = json_encode($config);
+        return "<div class=\"dplayer\" data-config='{$json}'></div>";
     }
 
     public static function addEditorButton()
     {
-        $dir = Helper::options()->pluginUrl . '/DPlayer/dist/editor.js';
+        $dir = Helper::options()->pluginUrl . '/DPlayer/assets/editor.js';
         echo "<script type=\"text/javascript\" src=\"{$dir}\"></script>";
     }
 
@@ -191,10 +174,10 @@ EOF;
     {
         $theme = new Typecho_Widget_Helper_Form_Element_Text(
             'theme', null, '#FADFA3',
-            _t('默认主题颜色'), _t('播放器默认的主题颜色，如 #372e21、#75c、red、blue，该设定会被[dplayer]标签中的theme属性覆盖，默认为 #FADFA3'));
+            _t('默认主题颜色'), _t('播放器默认的主题颜色，例如 #372e21、#75c、red、blue，该设定会被[dplayer]标签中的theme属性覆盖，默认为 #FADFA3'));
         $api = new Typecho_Widget_Helper_Form_Element_Text(
-            'api', null, 'https://api.prprpr.me/dplayer/v3/',
-            _t('弹幕服务器地址'), _t('用于保存视频弹幕，默认为 https://api.prprpr.me/dplayer/v3/'));
+            'api', null, '',
+            _t('弹幕服务器地址'), _t('用于保存视频弹幕，例如 https://api.prprpr.me/dplayer/v3/'));
         $hls = new Typecho_Widget_Helper_Form_Element_Radio('hls', array('0' => _t('不开启HLS支持'), '1' => _t('开启HLS支持')), '0', _t('HLS支持'), _t("开启后可解析 m3u8 格式视频"));
         $flv = new Typecho_Widget_Helper_Form_Element_Radio('flv', array('0' => _t('不开启FLV支持'), '1' => _t('开启FLV支持')), '0', _t('FLV支持'), _t("开启后可解析 flv 格式视频"));
         $form->addInput($theme);

@@ -54,7 +54,7 @@ $(function () {
             var cursorPos = startPos;
             editor.value = editor.value.substring(0, startPos)
                 + tag
-                + editor.value.substring(endPos, myField.value.length);
+                + editor.value.substring(endPos, editor.textLength);
             cursorPos += tag.length;
             editor.focus();
             editor.selectionStart = cursorPos;

@@ -5,9 +5,9 @@ if (!defined('__TYPECHO_ROOT_DIR__')) exit;
  * DPlayer for typecho
  *
  * @package DPlayer
- * @author Volio
- * @version 1.1.0
- * @link https://niconiconi.org
+ * @author player
+ * @version 1.1.1
+ * @link https://niconiconi.net
  */
 class DPlayer_Plugin implements Typecho_Plugin_Interface
 {
@@ -45,7 +45,7 @@ class DPlayer_Plugin implements Typecho_Plugin_Interface
     public static function playerHeader()
     {
         echo <<<EOF
-<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/dplayer/dist/DPlayer.min.css" />
+<link rel="stylesheet" type="text/css" href="https://lf9-cdn-tos.bytecdntp.com/cdn/expire-1-M/dplayer/1.25.0/DPlayer.min.css" />
 EOF;
     }
 
@@ -63,7 +63,7 @@ EOF;
             echo "<script type=\"text/javascript\" src=\"$url/plugin/flv.min.js\"></script>\n";
         }
         echo <<<EOF
-<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/dplayer/dist/DPlayer.min.js"></script>
+<script type="text/javascript" src="https://lf26-cdn-tos.bytecdntp.com/cdn/expire-1-M/dplayer/1.25.0/DPlayer.min.js"></script>
 <script type="text/javascript" src="$url/assets/player.js"></script>
 EOF;
     }

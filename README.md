@@ -31,4 +31,4 @@ loadDPlayer();
 ```
 
 ### LICENSE
-MIT © [Volio](https://niconiconi.org)
+MIT
